@@ -19,7 +19,6 @@ def validate_excel_file(file, filename):
             sheet_name= workbook.sheetnames[0]
             sheet = workbook[sheet_name]
 
-            dims = sheet.calculate_dimension()
             min_row = sheet.min_row
             max_row = sheet.max_row
 
@@ -34,7 +33,7 @@ def validate_excel_file(file, filename):
                 column_names.append(cell.value)
             
             if column_names == DEMANDE_COLUMN_NAMES:
-                print("Column names are correct")
+                logging.info("Column names are correct")
                 return True
 
 
@@ -77,8 +76,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     filename = file.filename
 
     if(validate_excel_file(file,filename)):
-        return func.HttpResponse(f"The file {filename}is valid and can be processed")
+        return func.HttpResponse(f"The file {filename} is valid and can be processed")
     
     else:
-        return func.HttpResponse(f"The file {filename}is not valid and can not be processed")
+        return func.HttpResponse(f"The file {filename} is not valid and can not be processed")
         
