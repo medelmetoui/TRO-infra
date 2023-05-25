@@ -36,12 +36,10 @@ def validate_excel_file(file, filename):
                 logging.info("Column names are correct")
                 return True
 
-
         if "FLOTTE" in  filename:
             sheet_name= workbook.sheetnames[0]
             sheet = workbook[sheet_name]
 
-            dims = sheet.calculate_dimension()
             min_row = sheet.min_row
             max_row = sheet.max_row
 
@@ -68,7 +66,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     logging.info('Python HTTP trigger function processed a request.')
 
-
     if 'fileName' not in req.files:
         return 'No file found in the request.'
 
@@ -77,7 +74,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     if(validate_excel_file(file,filename)):
         return func.HttpResponse(f"The file {filename} is valid and can be processed")
-    
     else:
         return func.HttpResponse(f"The file {filename} is not valid and can not be processed")
         
