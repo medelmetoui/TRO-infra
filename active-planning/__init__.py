@@ -105,7 +105,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             # custom edit par agent trajet
             body = req.get_json()
-            
+
             #body = transform_format(body)
 
             response = requests.request("GET",

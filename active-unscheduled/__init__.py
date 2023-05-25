@@ -6,7 +6,7 @@ import json
 from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
 from datetime import datetime ,timedelta
 import pytz
-
+import os 
 def get_active_planning():
 
     connect_str = 'DefaultEndpointsProtocol=https;AccountName=troblobstorage;AccountKey=YO16wuzFj6wkoK/AjMoYjEUcPXHWbkL1BmGc280AijovwovRP64DvMIY+e5i6b+m0BVJN1jdkNQ7+AStejBP9A==;EndpointSuffix=core.windows.net'
@@ -41,17 +41,17 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     # Active demande =
 
     active_planning = get_active_planning() 
+    unscheduled_demands = active_planning['unscheduled_filename']
 
     if active_planning['has_unscheduled_demands']:
         for blob in blobs_list:
-            if "DEMANDE_NON_PLANIFIEE" in blob.name:
-                if blob.last_modified > latest_time:
-                        latest_blob = blob
-                        latest_time = blob.last_modified
-
+            blob_name = os.path.basename(blob.name)
+            if unscheduled_demands == blob_name:
+                unscheduled_demands_blob  = blob
+                      
         # Print the name of the latest blob
-        if latest_blob:
-            print(f"Latest blob name: {latest_blob.name}")
+        if unscheduled_demands_blob:
+            print(f"Latest blob name: {unscheduled_demands_blob.name}")
         else:
             print("No blobs found in the container.")
             return func.HttpResponse("No blobs found in the container.", mimetype="application/json")
@@ -59,12 +59,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         sas = generate_blob_sas(account_name="troblobstorage",
                                     container_name="output",
-                                    blob_name=latest_blob.name,
+                                    blob_name=unscheduled_demands_blob.name,
                                     account_key="YO16wuzFj6wkoK/AjMoYjEUcPXHWbkL1BmGc280AijovwovRP64DvMIY+e5i6b+m0BVJN1jdkNQ7+AStejBP9A==",
                                     permission=BlobSasPermissions(read=True,write=True,create=True),
                                     expiry=datetime.utcnow() + timedelta(hours=1))
 
-        url = "https://troblobstorage.blob.core.windows.net/output/"+latest_blob.name+"?"+sas
+        url = "https://troblobstorage.blob.core.windows.net/output/"+unscheduled_demands_blob.name+"?"+sas
         
         headers = {
             'x-ms-blob-type':'BlockBlob'
@@ -97,4 +97,4 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         else :
             return func.HttpResponse(json_data, mimetype="application/json")
     else:
-        func.HttpResponse("No unscheduled demands.", mimetype="application/json")
+        return func.HttpResponse("No unscheduled demands for"+active_planning['planning_filename'], mimetype="application/json")
