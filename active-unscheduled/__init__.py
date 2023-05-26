@@ -27,8 +27,7 @@ def get_active_planning():
         if file['active']:
             active_planning = file
             return active_planning
-        else:
-            return "No active planning"
+
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     

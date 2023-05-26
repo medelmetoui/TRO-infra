@@ -56,8 +56,7 @@ def get_active_planning():
         if file['active']:
             active_planning = file
             return active_planning
-        else:
-            return "No active planning"
+ 
     
 def main(req: func.HttpRequest) -> func.HttpResponse:
 
@@ -78,21 +77,21 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     for blob in blobs_list:
         blob_name = os.path.basename(blob.name)
         if active_planning_name == blob_name:            
-            active_planning  = blob
+            active_planning_blob_file  = blob
             continue
 
     # Print the name of the latest blob
-    if active_planning:
-        logging.info(f"Active blob name: {active_planning.name}")
+    if active_planning_blob_file:
+        logging.info(f"Active blob name: {active_planning_blob_file.name}")
 
         sas = generate_blob_sas(account_name="troblobstorage",
                                     container_name="output",
-                                    blob_name=active_planning.name,
+                                    blob_name=active_planning_blob_file.name,
                                     account_key="YO16wuzFj6wkoK/AjMoYjEUcPXHWbkL1BmGc280AijovwovRP64DvMIY+e5i6b+m0BVJN1jdkNQ7+AStejBP9A==",
                                     permission=BlobSasPermissions(read=True,write=True,create=True),
                                     expiry=datetime.utcnow() + timedelta(hours=1))
 
-        url = "https://troblobstorage.blob.core.windows.net/output/"+active_planning.name+"?"+sas
+        url = "https://troblobstorage.blob.core.windows.net/output/"+active_planning_blob_file.name+"?"+sas
         
         headers = {
             'Content-Type': 'application/json',
@@ -100,6 +99,27 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             'x-ms-blob-type':'BlockBlob'
         }
 
+        if req.method == 'POST':
+
+            body = req.get_json()
+            active_planning['status']="validated"
+
+            response = requests.request("POST",
+                                        url,
+                                        headers=headers,
+                                        data=json.dumps(body)
+                                        )
+            
+            response_text = response.content.decode('utf-8')
+            reader = csv.DictReader(response_text.splitlines())
+            data = list(reader)
+
+            #print(data)
+
+            return func.HttpResponse(json.dumps(data),
+                                    status_code=200,
+                                    mimetype="application/json")
+        
 
         if req.method == 'PUT':
 
@@ -107,6 +127,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             body = req.get_json()
 
             #body = transform_format(body)
+
+            ### First get all the file
 
             response = requests.request("GET",
                                         url,
