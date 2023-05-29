@@ -24,18 +24,20 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     
     all_meta = []
 
-    for blob in blobs_list:
-        blob_client=container_client.get_blob_client(blob)
-        blob_content = blob_client.download_blob().content_as_text()
-        meta_file = json.loads(blob_content)
+    if planning_name_to_activate:
 
-        if meta_file['active'] == True:
-            meta_file['active']=False
-            
-        if meta_file['planning_filename'] == planning_name_to_activate:
-            meta_file['active']=True
+        for blob in blobs_list:
+            blob_client=container_client.get_blob_client(blob)
+            blob_content = blob_client.download_blob().content_as_text()
+            meta_file = json.loads(blob_content)
 
-        blob_client.upload_blob(json.dumps(meta_file),overwrite=True)
+            if meta_file['active'] == True:
+                meta_file['active']=False
+                
+            if meta_file['planning_filename'] == planning_name_to_activate:
+                meta_file['active']=True
+
+            blob_client.upload_blob(json.dumps(meta_file),overwrite=True)
         
 
     return func.HttpResponse(f"plannning{planning_name_to_activate} is activated")

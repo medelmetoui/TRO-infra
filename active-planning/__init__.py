@@ -99,28 +99,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             'x-ms-blob-type':'BlockBlob'
         }
 
-        if req.method == 'POST':
-
-            body = req.get_json()
-            active_planning['status']="validated"
-
-            response = requests.request("POST",
-                                        url,
-                                        headers=headers,
-                                        data=json.dumps(body)
-                                        )
-            
-            response_text = response.content.decode('utf-8')
-            reader = csv.DictReader(response_text.splitlines())
-            data = list(reader)
-
-            #print(data)
-
-            return func.HttpResponse(json.dumps(data),
-                                    status_code=200,
-                                    mimetype="application/json")
-        
-
         if req.method == 'PUT':
 
             # custom edit par agent trajet
