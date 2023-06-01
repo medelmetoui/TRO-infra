@@ -7,10 +7,21 @@ import datetime
 import csv
 from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
 import os 
+
 from utils import (
     remove_array ,
     transform_format
     )
+
+from retrying import retry
+
+
+@retry(stop_max_attempt_number=3, wait_fixed=200000)  # Retry 3 times with a fixed 2-second delay between retries
+def make_request(url):
+    response = requests.get(url)
+    response.raise_for_status()  # Raise an exception if the request was unsuccessful
+    return response
+
 
 def get_old_trajet(planning,agent,shift):
 
@@ -23,19 +34,30 @@ def get_old_trajet(planning,agent,shift):
             trajet.append(elem)
             positions.append(idx)
     
+    if trajet[0] != "Chargement" and trajet[-1] !="Fin":
+        trajet = []
+    
     return trajet,positions
 
+#@func.timeout(seconds=240)
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
-    response = requests.get('https://last-planning.azurewebsites.net/api/active-planning')
-    planning = response.json()
+    try:
+        
+        response = make_request('https://last-planning.azurewebsites.net/api/active-planning')
+        planning = response.json()
 
-    response_2 = requests.get('https://last-planning.azurewebsites.net/api/active-planning-details')
-    meta_planning = response_2.json()
+        response_2 = make_request('https://last-planning.azurewebsites.net/api/active-planning-details')
+        meta_planning = response_2.json()
 
-    blob_name = meta_planning['planning_filename']
+        blob_name = meta_planning['planning_filename']
+
+    except requests.exceptions.RequestException as e:
+        # Handle request exceptions (e.g., connection error, invalid URL)
+        logging.critical("Request error:", str(e))
+    
 
     if response.status_code == 200:
 
