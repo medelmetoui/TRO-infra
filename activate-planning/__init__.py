@@ -12,7 +12,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
 
-    planning_name_to_activate = req.get_body().decode('utf-8')
+    planning_name_to_activate = req.get_body().decode('utf-8').strip()
 
 
     connect_str = 'DefaultEndpointsProtocol=https;AccountName=troblobstorage;AccountKey=YO16wuzFj6wkoK/AjMoYjEUcPXHWbkL1BmGc280AijovwovRP64DvMIY+e5i6b+m0BVJN1jdkNQ7+AStejBP9A==;EndpointSuffix=core.windows.net'
@@ -24,23 +24,30 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     
     all_meta = []
 
-    if planning_name_to_activate:
+    response_2 = requests.get('https://last-planning.azurewebsites.net/api/active-planning-details')
+    meta_active_planning = response_2.json()
 
-        for blob in blobs_list:
-            blob_client=container_client.get_blob_client(blob)
-            blob_content = blob_client.download_blob().content_as_text()
-            meta_file = json.loads(blob_content)
-
-            if meta_file['active'] == True:
-                meta_file['active']=False
-                
-            if meta_file['planning_filename'] == planning_name_to_activate:
-                meta_file['active']=True
-
-            blob_client.upload_blob(json.dumps(meta_file),overwrite=True)
-        
-
-    return func.HttpResponse(f"plannning{planning_name_to_activate} is activated")
+    if meta_active_planning == planning_name_to_activate:
+        return func.HttpResponse(f"plannning{planning_name_to_activate} is activated")
     
+    else:
+        if planning_name_to_activate.endswith(".csv"):
+
+            for blob in blobs_list:
+                blob_client=container_client.get_blob_client(blob)
+                blob_content = blob_client.download_blob().content_as_text()
+                meta_file = json.loads(blob_content)
+
+                if meta_file['active'] == True:
+                    meta_file['active']=False
+                    
+                if meta_file['planning_filename'] == planning_name_to_activate:
+                    meta_file['active']=True
+
+                blob_client.upload_blob(json.dumps(meta_file),overwrite=True)
+
+
+        return func.HttpResponse(f"plannning{planning_name_to_activate} is activated")
+        
     
     
