@@ -31,7 +31,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(f"plannning{planning_name_to_activate} is activated")
     
     else:
-        if planning_name_to_activate.endswith(".csv"):
+        if planning_name_to_activate.endswith(".json"):
 
             for blob in blobs_list:
                 blob_client=container_client.get_blob_client(blob)
@@ -47,7 +47,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 blob_client.upload_blob(json.dumps(meta_file),overwrite=True)
 
 
-        return func.HttpResponse(f"plannning{planning_name_to_activate} is activated")
+        return func.HttpResponse(f"plannning:{planning_name_to_activate} is activated")
         
     
     
