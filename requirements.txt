@@ -5,11 +5,8 @@
 azure-functions
 pandas==1.3.5
 deepdiff
-cachetools
-aiohttp
 timedelta
 gevent
 retrying
-grequests
 azure-storage-blob==12.14.1
 openpyxl==3.0.10
