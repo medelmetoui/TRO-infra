@@ -5,7 +5,7 @@ import json
 from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions,BlobClient
 from datetime import datetime,timedelta
 from deepdiff import DeepDiff
-
+import re
 
 async def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
