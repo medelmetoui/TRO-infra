@@ -64,47 +64,53 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
             duration_diff=  old_start_time-new_start_time
             if duration_diff.total_seconds()>0:
                 for trajet in new_planning:
-                    for idx,step in enumerate(trajet['steps']):
-                        if idx==0:
-                            end_time = step['endTime']
-                            end = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S")
-                            end = end + duration_diff
-                            time_str_reconverted = end.strftime("%Y-%m-%dT%H:%M:%S")
-                            step['endTime'] = time_str_reconverted
-                        else:
-                            start_time = step['startTime']
-                            start = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S")
-                            start = start + duration_diff
-                            start_time_str_reconverted = start.strftime("%Y-%m-%dT%H:%M:%S")
-                            step['startTime'] =start_time_str_reconverted
+                    if trajet['trajet_id']==edited_trajet_id:
+                        for idx,step in enumerate(trajet['steps']):
+                            if idx==0:
+                                end_time = step['endTime']
+                                end = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S")
+                                end = end + duration_diff
+                                time_str_reconverted = end.strftime("%Y-%m-%dT%H:%M:%S")
+                                step['endTime'] = time_str_reconverted
+                            else:
+                                start_time = step['startTime']
+                                start = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S")
+                                start = start + duration_diff
+                                start_time_str_reconverted = start.strftime("%Y-%m-%dT%H:%M:%S")
+                                step['startTime'] =start_time_str_reconverted
 
-                            end_time = step['endTime']
-                            end = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S")
-                            end = end + duration_diff
-                            end_time_str_reconverted = end.strftime("%Y-%m-%dT%H:%M:%S")
-                            step['endTime'] = end_time_str_reconverted    
-                            
+                                end_time = step['endTime']
+                                end = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S")
+                                end = end + duration_diff
+                                end_time_str_reconverted = end.strftime("%Y-%m-%dT%H:%M:%S")
+                                step['endTime'] = end_time_str_reconverted   
+                    else:
+                        continue 
+                                
             if duration_diff.total_seconds()<0:
                 for trajet in new_planning:
-                    for idx,step in enumerate(trajet['steps']):
-                        if idx==0:
-                            end_time = step['endTime']
-                            end = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S")
-                            end = end - duration_diff
-                            time_str_reconverted = end.strftime("%Y-%m-%dT%H:%M:%S")
-                            step['endTime'] = time_str_reconverted
-                        else:
-                            start_time = step['startTime']
-                            start = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S")
-                            start = start - duration_diff
-                            start_time_str_reconverted = start.strftime("%Y-%m-%dT%H:%M:%S")
-                            step['startTime'] =start_time_str_reconverted
+                    if trajet['trajet_id']==edited_trajet_id:
+                        for idx,step in enumerate(trajet['steps']):
+                            if idx==0:
+                                end_time = step['endTime']
+                                end = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S")
+                                end = end - duration_diff
+                                time_str_reconverted = end.strftime("%Y-%m-%dT%H:%M:%S")
+                                step['endTime'] = time_str_reconverted
+                            else:
+                                start_time = step['startTime']
+                                start = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S")
+                                start = start - duration_diff
+                                start_time_str_reconverted = start.strftime("%Y-%m-%dT%H:%M:%S")
+                                step['startTime'] =start_time_str_reconverted
 
-                            end_time = step['endTime']
-                            end = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S")
-                            end = end - duration_diff
-                            end_time_str_reconverted = end.strftime("%Y-%m-%dT%H:%M:%S")
-                            step['endTime'] = end_time_str_reconverted   
+                                end_time = step['endTime']
+                                end = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S")
+                                end = end - duration_diff
+                                end_time_str_reconverted = end.strftime("%Y-%m-%dT%H:%M:%S")
+                                step['endTime'] = end_time_str_reconverted 
+                    else:
+                        continue  
 
         blob_client.upload_blob(json.dumps(new_planning),overwrite=True)
 
