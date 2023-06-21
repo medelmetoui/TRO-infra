@@ -67,6 +67,7 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
                     if trajet['trajet_id']==edited_trajet_id:
                         for idx,step in enumerate(trajet['steps']):
                             if idx==0:
+                                start_time_trajet = step['startTime']
                                 end_time = step['endTime']
                                 end = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S")
                                 end = end + duration_diff
@@ -83,7 +84,10 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
                                 end = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S")
                                 end = end + duration_diff
                                 end_time_str_reconverted = end.strftime("%Y-%m-%dT%H:%M:%S")
-                                step['endTime'] = end_time_str_reconverted   
+                                step['endTime'] = end_time_str_reconverted
+                                end_time_try = step['endTime']
+                        trajet['trajet_start_time']=start_time_trajet
+                        trajet['trajet_end_time']=end_time_try
                     else:
                         continue 
                                 
