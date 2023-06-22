@@ -6,6 +6,16 @@ from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPerm
 from datetime import datetime,timedelta
 from deepdiff import DeepDiff
 import re
+def trajet_steps_update(planning):
+    for trajet in planning:
+        trajet_starts_at_first_step =trajet['steps'][0]['startTime']
+        trajet_ends_at_last_step = trajet['steps'][-1]['endTime']
+        trajet['trajet_start_time']=trajet_starts_at_first_step
+        trajet['trajet_end_time']=trajet_ends_at_last_step
+    return planning
+
+
+
 
 async def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
@@ -37,7 +47,7 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
     json_diff= DeepDiff(old_planning,new_planning)
 
     if json_diff:
-        if "startTime" in json_diff.affected_paths.items[0]:
+        if "startTime" in json_diff.affected_paths.items[0] and "steps" in json_diff.affected_paths.items[0] :
             
             path = json_diff.affected_paths.items[0]        
             pattern = r"\[(\d+)\]"
@@ -61,18 +71,19 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
                             new_start_time_str= step['startTime']
                             new_start_time = datetime.strptime(new_start_time_str, "%Y-%m-%dT%H:%M:%S")
 
-            duration_diff=  old_start_time-new_start_time
-            if duration_diff.total_seconds()>0:
+            if old_start_time<new_start_time:
+                duration_diff=  new_start_time-old_start_time
+                ## On additionne la difference 
                 for trajet in new_planning:
                     if trajet['trajet_id']==edited_trajet_id:
                         for idx,step in enumerate(trajet['steps']):
                             if idx==0:
-                                start_time_trajet = step['startTime']
                                 end_time = step['endTime']
                                 end = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S")
                                 end = end + duration_diff
-                                time_str_reconverted = end.strftime("%Y-%m-%dT%H:%M:%S")
-                                step['endTime'] = time_str_reconverted
+                                start_time_str_reconverted = end.strftime("%Y-%m-%dT%H:%M:%S")
+                                step['endTime'] = start_time_str_reconverted
+                                trajet['trajet_start_time']=start_time_str_reconverted
                             else:
                                 start_time = step['startTime']
                                 start = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S")
@@ -84,16 +95,33 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
                                 end = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S")
                                 end = end + duration_diff
                                 end_time_str_reconverted = end.strftime("%Y-%m-%dT%H:%M:%S")
-                                step['endTime'] = end_time_str_reconverted
-                                end_time_try = step['endTime']
-                        trajet['trajet_start_time']=start_time_trajet
-                        trajet['trajet_end_time']=end_time_try
+                                step['endTime'] = end_time_str_reconverted  
+                        
+                        # trajet_starts_at_first_step =trajet['steps'][0]['startTime']
+                        # trajet_ends_at_last_step = trajet['steps'][-1]['endTime']
+                        # trajet['trajet_start_time']=trajet_starts_at_first_step
+                        # trajet['trajet_end_time']=trajet_ends_at_last_step
+
+                        # # Calcul nouvelle duree
+
+                        # traj_start = datetime.strptime(trajet['trajet_start_time'], "%Y-%m-%dT%H:%M:%S")
+                        # traj_end = datetime.strptime(trajet['trajet_end_time'], "%Y-%m-%dT%H:%M:%S")
+                        # total_diff= traj_end-traj_start
+                        # formatted_duration = f"{total_diff.seconds // 3600:02d}:{(total_diff.seconds // 60) % 60:02d}:{total_diff.seconds % 60:02d}"
+
+                        # trajet['duree du trajet']=formatted_duration
+                        
+
+
                     else:
                         continue 
                                 
-            if duration_diff.total_seconds()<0:
+            if new_start_time<old_start_time:
+                duration_diff=  old_start_time-new_start_time
+                ## On diminue la difference
                 for trajet in new_planning:
                     if trajet['trajet_id']==edited_trajet_id:
+                        ## Update steps
                         for idx,step in enumerate(trajet['steps']):
                             if idx==0:
                                 end_time = step['endTime']
@@ -113,9 +141,14 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
                                 end = end - duration_diff
                                 end_time_str_reconverted = end.strftime("%Y-%m-%dT%H:%M:%S")
                                 step['endTime'] = end_time_str_reconverted 
+                        # Update trajet
+                        trajet['trajet_start_time']=trajet['steps'][0]['startTime']
+                        trajet['trajet_start_time']=trajet['steps'][-1]['endTime']
+
                     else:
                         continue  
-
+        
+        new_planning=trajet_steps_update(new_planning)
         blob_client.upload_blob(json.dumps(new_planning),overwrite=True)
 
     return func.HttpResponse(json.dumps(new_planning), mimetype="application/json")
