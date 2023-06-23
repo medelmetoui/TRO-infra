@@ -6,6 +6,7 @@ from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPerm
 from datetime import datetime,timedelta
 from deepdiff import DeepDiff
 import re
+
 def trajet_steps_update(planning):
     for trajet in planning:
         trajet_starts_at_first_step =trajet['steps'][0]['startTime']
@@ -13,8 +14,6 @@ def trajet_steps_update(planning):
         trajet['trajet_start_time']=trajet_starts_at_first_step
         trajet['trajet_end_time']=trajet_ends_at_last_step
     return planning
-
-
 
 
 async def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -142,7 +141,7 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
                                 end_time_str_reconverted = end.strftime("%Y-%m-%dT%H:%M:%S")
                                 step['endTime'] = end_time_str_reconverted 
                         # Update trajet
-                        trajet['trajet_start_time']=trajet['steps'][0]['startTime']
+                        trajet['trajet_start_time']=trajet['steps'][0]['startTime']   
                         trajet['trajet_start_time']=trajet['steps'][-1]['endTime']
 
                     else:
