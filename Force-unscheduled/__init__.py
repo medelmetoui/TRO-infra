@@ -40,6 +40,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     current_qte = float(step['quantity'])
                     current_qte = current_qte + quantity_to_add
                     step['quantity'] = str(current_qte)
+            else:
+                continue
     
     blob_client.upload_blob(json.dumps(new_planning),overwrite=True)
                     
