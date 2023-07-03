@@ -15,7 +15,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     repository_name="SEC"
 
     # active planning 
-    unscheduled_file_name = "XUNSCHEDULED_QUEUE.json"
+    unscheduled_file_name = "UNSCHEDULED_QUEUE.json"
 
     ## FROM META WE GET THE ACTIVE PLANNING 
     sas = generate_blob_sas(account_name="troblobstorage",

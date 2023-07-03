@@ -9,8 +9,8 @@ import re
 
 def trajet_steps_update(planning):
     for trajet in planning:
-        trajet_starts_at_first_step =trajet['steps'][0]['startTime']
-        trajet_ends_at_last_step = trajet['steps'][-1]['endTime']
+        trajet_starts_at_first_step =trajet['steps'][0]['DEBUT']
+        trajet_ends_at_last_step = trajet['steps'][-1]['FIN']
         trajet['trajet_start_time']=trajet_starts_at_first_step
         trajet['trajet_end_time']=trajet_ends_at_last_step
     return planning
@@ -46,7 +46,7 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
     json_diff= DeepDiff(old_planning,new_planning)
 
     if json_diff:
-        if "startTime" in json_diff.affected_paths.items[0] and "steps" in json_diff.affected_paths.items[0] :
+        if "DEBUT" in json_diff.affected_paths.items[0] and "steps" in json_diff.affected_paths.items[0] :
             
             path = json_diff.affected_paths.items[0]        
             pattern = r"\[(\d+)\]"
@@ -60,14 +60,14 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
                 if trajet['trajet_id']==edited_trajet_id:
                     for idx, step in enumerate(trajet['steps']):
                         if idx ==0:
-                            old_start_time_str= step['startTime']
+                            old_start_time_str= step['DEBUT']
                             old_start_time = datetime.strptime(old_start_time_str, "%Y-%m-%d %H:%M")
 
             for trajet in new_planning:
                 if trajet['trajet_id']==edited_trajet_id:
                     for idx, step in enumerate(trajet['steps']):    
                         if idx ==0:
-                            new_start_time_str= step['startTime']
+                            new_start_time_str= step['DEBUT']
                             new_start_time = datetime.strptime(new_start_time_str, "%Y-%m-%d %H:%M")
 
             if old_start_time<new_start_time:
@@ -77,24 +77,24 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
                     if trajet['trajet_id']==edited_trajet_id:
                         for idx,step in enumerate(trajet['steps']):
                             if idx==0:
-                                end_time = step['endTime']
+                                end_time = step['FIN']
                                 end = datetime.strptime(end_time, "%Y-%m-%d %H:%M")
                                 end = end + duration_diff
                                 start_time_str_reconverted = end.strftime("%Y-%m-%d %H:%M")
-                                step['endTime'] = start_time_str_reconverted
+                                step['FIN'] = start_time_str_reconverted
                                 trajet['trajet_start_time']=start_time_str_reconverted
                             else:
-                                start_time = step['startTime']
+                                start_time = step['DEBUT']
                                 start = datetime.strptime(start_time, "%Y-%m-%d %H:%M")
                                 start = start + duration_diff
                                 start_time_str_reconverted = start.strftime("%Y-%m-%d %H:%M")
-                                step['startTime'] =start_time_str_reconverted
+                                step['DEBUT'] =start_time_str_reconverted
 
-                                end_time = step['endTime']
+                                end_time = step['FIN']
                                 end = datetime.strptime(end_time, "%Y-%m-%d %H:%M")
                                 end = end + duration_diff
                                 end_time_str_reconverted = end.strftime("%Y-%m-%d %H:%M")
-                                step['endTime'] = end_time_str_reconverted  
+                                step['FIN'] = end_time_str_reconverted  
                         
                         # trajet_starts_at_first_step =trajet['steps'][0]['startTime']
                         # trajet_ends_at_last_step = trajet['steps'][-1]['endTime']
@@ -110,8 +110,6 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
 
                         # trajet['duree du trajet']=formatted_duration
                         
-
-
                     else:
                         continue 
                                 
@@ -123,26 +121,26 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
                         ## Update steps
                         for idx,step in enumerate(trajet['steps']):
                             if idx==0:
-                                end_time = step['endTime']
+                                end_time = step['FIN']
                                 end = datetime.strptime(end_time, "%Y-%m-%d %H:%M")
                                 end = end - duration_diff
                                 time_str_reconverted = end.strftime("%Y-%m-%d %H:%M")
-                                step['endTime'] = time_str_reconverted
+                                step['FIN'] = time_str_reconverted
                             else:
-                                start_time = step['startTime']
+                                start_time = step['DEBUT']
                                 start = datetime.strptime(start_time, "%Y-%m-%d %H:%M")
                                 start = start - duration_diff
                                 start_time_str_reconverted = start.strftime("%Y-%m-%d %H:%M")
-                                step['startTime'] =start_time_str_reconverted
+                                step['DEBUT'] =start_time_str_reconverted
 
-                                end_time = step['endTime']
+                                end_time = step['FIN']
                                 end = datetime.strptime(end_time, "%Y-%m-%d %H:%M")
                                 end = end - duration_diff
                                 end_time_str_reconverted = end.strftime("%Y-%m-%d %H:%M")
-                                step['endTime'] = end_time_str_reconverted 
+                                step['FIN'] = end_time_str_reconverted 
                         # Update trajet
-                        trajet['trajet_start_time']=trajet['steps'][0]['startTime']   
-                        trajet['trajet_start_time']=trajet['steps'][-1]['endTime']
+                        trajet['trajet_start_time']=trajet['steps'][0]['DEBUT']   
+                        trajet['trajet_start_time']=trajet['steps'][-1]['FIN']
 
                     else:
                         continue  
