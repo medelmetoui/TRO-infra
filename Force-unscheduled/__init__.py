@@ -34,12 +34,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     # ## First update planning
     for trajet in new_planning:
         for idx,step in enumerate(trajet['steps']):
-            if step['Magasin'] in new_demande['LIB_MAGASIN'] or new_demande['LIB_MAGASIN'] in step['Magasin']:
-                if step['etat'] == "DECHARGEMENT":
+            if step['DESTINATION'] in new_demande['LIB_MAGASIN'] or new_demande['LIB_MAGASIN'] in step['DESTINATION']:
+                if step['ETAT'] == "DECHARGEMENT":
                     quantity_to_add = float(new_demande['DEMANDE'])
-                    current_qte = float(step['quantity'])
+                    current_qte = float(step['QUANTITE'])
                     current_qte = current_qte + quantity_to_add
-                    step['quantity'] = str(current_qte)
+                    step['QUANTITE'] = current_qte
             else:
                 continue
     
@@ -50,7 +50,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     repository_name="SEC"
 
     # active planning 
-    unscheduled_file_name = "XUNSCHEDULED_QUEUE.json"
+    unscheduled_file_name = "UNSCHEDULED_QUEUE.json"
 
     ## FROM META WE GET THE ACTIVE PLANNING 
     sas = generate_blob_sas(account_name="troblobstorage",
