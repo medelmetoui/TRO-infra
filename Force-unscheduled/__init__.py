@@ -3,6 +3,7 @@ import json
 import azure.functions as func
 from azure.storage.blob import BlobClient,generate_blob_sas,BlobSasPermissions
 from datetime import datetime,timedelta
+import ptvsd
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     """
@@ -34,8 +35,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     # ## First update planning
     for trajet in new_planning:
         for idx,step in enumerate(trajet['steps']):
-            if step['Magasin'] in new_demande['LIB_MAGASIN']:
-                if step['etat'] == "Dechargement":
+            if step['Magasin'] in new_demande['LIB_MAGASIN'] or new_demande['LIB_MAGASIN'] in step['Magasin']:
+                if step['etat'] == "DECHARGEMENT":
                     quantity_to_add = float(new_demande['DEMANDE'])
                     current_qte = float(step['quantity'])
                     current_qte = current_qte + quantity_to_add
