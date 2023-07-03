@@ -3,7 +3,6 @@ import json
 import azure.functions as func
 from azure.storage.blob import BlobClient,generate_blob_sas,BlobSasPermissions
 from datetime import datetime,timedelta
-import ptvsd
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     """
