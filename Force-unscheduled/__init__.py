@@ -32,24 +32,27 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     new_demande = json.loads(demande)
 
     # ## First update planning
+
+    force_break = False
+
     for trajet in new_planning:
         for idx,step in enumerate(trajet['steps']):
-            if step['DESTINATION'] in new_demande['LIB_MAGASIN'] or new_demande['LIB_MAGASIN'] in step['DESTINATION']:
-                if step['ETAT'] == "DECHARGEMENT":
-                    quantity_to_add = float(new_demande['DEMANDE'])
-                    current_qte = float(step['QUANTITE'])
-                    current_qte = current_qte + quantity_to_add
-                    step['QUANTITE'] = current_qte
-            else:
-                continue
-    
+            if force_break==False:
+                if step['Magasin'] in new_demande['LIB_MAGASIN'] or new_demande['LIB_MAGASIN'] in step['Magasin']:
+                    if step['etat'] == "DECHARGEMENT":
+                        quantity_to_add = float(new_demande['DEMANDE'])
+                        current_qte = float(step['quantity'])
+                        current_qte = current_qte + quantity_to_add
+                        step['quantity'] = str(current_qte)
+                        force_break=True
+                        break
+
+
     blob_client.upload_blob(json.dumps(new_planning),overwrite=True)
 
     #### UPDATE THE UNSCHDULED FILE 
 
     repository_name="SEC"
-
-    # active planning 
     unscheduled_file_name = "UNSCHEDULED_QUEUE.json"
 
     ## FROM META WE GET THE ACTIVE PLANNING 
@@ -72,10 +75,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         if demande == new_demande:
             unscheduled_file.remove(demande)
             blob_client.upload_blob(json.dumps(unscheduled_file),overwrite=True)
-        
-        else:
-            return func.HttpResponse("Magasin not present in the active planning file", mimetype="application/json")
-
                     
     return func.HttpResponse(json.dumps(new_planning), mimetype="application/json")
 
