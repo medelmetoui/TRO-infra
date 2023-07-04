@@ -72,6 +72,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         if demande == new_demande:
             unscheduled_file.remove(demande)
             blob_client.upload_blob(json.dumps(unscheduled_file),overwrite=True)
+        
+        else:
+            return func.HttpResponse("Magasin not present in the active planning file", mimetype="application/json")
+
                     
     return func.HttpResponse(json.dumps(new_planning), mimetype="application/json")
 
