@@ -75,12 +75,17 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     excel = convert_to_excel(steps_only)
 
     file_nameactive_planning_name=active_planning_name.replace(".json",".xlsx")
+
+    blob_client = BlobClient.from_connection_string(connect_str, container_name=container_name+"/SEC", blob_name=file_nameactive_planning_name)
+
+    blob_client.upload_blob(excel.getvalue(),overwrite=True)
     
     headers = {
         "Content-Disposition": f"attachment; filename={file_nameactive_planning_name}",
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     }
     
+
     if active_planning_blob_file:
         if req.method == 'GET':
             return func.HttpResponse(body=excel.getvalue(), headers=headers)

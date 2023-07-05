@@ -74,7 +74,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     for demande in unscheduled_file:
         if demande == new_demande:
             unscheduled_file.remove(demande)
-            blob_client.upload_blob(json.dumps(unscheduled_file),overwrite=True)
+    
+    blob_client.upload_blob(json.dumps(unscheduled_file),overwrite=True)
                     
     return func.HttpResponse(json.dumps(new_planning), mimetype="application/json")
 
