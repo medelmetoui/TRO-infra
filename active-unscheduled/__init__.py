@@ -36,3 +36,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     if unscheduled_file:
         if req.method == 'GET':
             return func.HttpResponse(json.dumps(unscheduled_file),mimetype="application/json")
+    else:
+        return func.HttpResponse(json.dumps([]),mimetype="application/json")
+
