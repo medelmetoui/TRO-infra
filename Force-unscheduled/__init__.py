@@ -71,9 +71,14 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     blob_content = blob_data.content_as_text()
     unscheduled_file = json.loads(blob_content)
 
+    break_remove = False
+
     for demande in unscheduled_file:
         if demande == new_demande:
-            unscheduled_file.remove(demande)
+            if break_remove== False:
+                unscheduled_file.remove(demande)
+                break_remove== True
+                break
     
     blob_client.upload_blob(json.dumps(unscheduled_file),overwrite=True)
                     
