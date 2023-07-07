@@ -45,6 +45,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                         step['quantity'] = str(current_qte)
                         force_break=True
                         break
+
+    blob_client.upload_blob(json.dumps(new_planning),overwrite=True)
             
     #### UPDATE THE UNSCHDULED FILE 
 
@@ -76,7 +78,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 break_remove== True
                 break
             
-    blob_client.upload_blob(json.dumps(new_planning),overwrite=True)
+    
 
     blob_client.upload_blob(json.dumps(unscheduled_file),overwrite=True)
                     
