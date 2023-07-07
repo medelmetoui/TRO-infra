@@ -32,7 +32,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     new_demande = json.loads(demande)
 
     # ## First update planning
-
     force_break = False
 
     for trajet in new_planning:
@@ -46,10 +45,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                         step['quantity'] = str(current_qte)
                         force_break=True
                         break
-
-
-    blob_client.upload_blob(json.dumps(new_planning),overwrite=True)
-
+            
     #### UPDATE THE UNSCHDULED FILE 
 
     repository_name="SEC"
@@ -79,10 +75,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 unscheduled_file.remove(demande)
                 break_remove== True
                 break
-    
+            
+    blob_client.upload_blob(json.dumps(new_planning),overwrite=True)
+
     blob_client.upload_blob(json.dumps(unscheduled_file),overwrite=True)
                     
-    return func.HttpResponse(json.dumps(new_planning), mimetype="application/json")
+    return func.HttpResponse(json.dumps(new_planning), mimetype="application/json",status_code=200)
 
                 
 

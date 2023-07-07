@@ -15,7 +15,6 @@ def trajet_steps_update(planning):
         trajet['trajet_end_time']=trajet_ends_at_last_step
     return planning
 
-
 async def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
@@ -48,13 +47,18 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
     if json_diff:
         if "startTime" in json_diff.affected_paths.items[0] and "steps" in json_diff.affected_paths.items[0] :
             
-            path = json_diff.affected_paths.items[0]        
-            pattern = r"\[(\d+)\]"
-            matches = re.endTimedall(pattern, path)
+            # path = json_diff.affected_paths.items[0]        
+            # pattern = r"\[(\d+)\]"
+            # matches = re.findall(pattern, path)
 
-            if len(matches) >= 2:
-                edited_trajet_id = int(matches[0])
-                step_id = int(matches[1])
+            # if len(matches) >= 2:
+            #     edited_trajet_id = int(matches[0])
+            #     step_id = int(matches[1])
+            
+            difference = [item for item in json_diff.t1 if item not in json_diff.t2]
+
+            if len(difference) == 1:
+                edited_trajet_id = int(difference[0]['trajet_id'])
 
             for trajet in old_planning:
                 if trajet['trajet_id']==edited_trajet_id:
@@ -150,6 +154,7 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
 
     return func.HttpResponse(json.dumps(new_planning), mimetype="application/json")
     
+
     # try:
     #     start = timer()
 
